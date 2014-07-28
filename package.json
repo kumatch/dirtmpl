@@ -1,0 +1,32 @@
+{
+  "name": "dirtmpl",
+  "description": "directory generator at the template.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "git://github.com/kumatch/dirtmpl.git"
+  },
+  "main": "index.js",
+  "bin": {
+    "dirtmpl": "bin/command.js"
+  },
+  "scripts": {
+    "test": "mocha --require intelli-espower-loader --reporter spec test/**/*.test.js"
+  },
+  "directories": {
+    "test": "test/"
+  },
+  "dependencies": {
+    "lockedpath": "^0.1.0",
+    "mkdirp": "^0.5.0",
+    "ncp": "^0.6.0",
+    "rimraf": "^2.2.8",
+    "yargs": "^1.2.6"
+  },
+  "devDependencies": {
+    "espower-loader": "^0.7.1",
+    "intelli-espower-loader": "^0.2.0",
+    "mocha": "^1.20.1",
+    "power-assert": "^0.7.2",
+    "temp": "^0.8.0"
+  }
+}

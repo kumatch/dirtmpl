@@ -1,0 +1,18 @@
+Usage:
+
+  dirtmpl add [name] [directory]
+
+    Store the directory templates at [directory] with the name [name].
+
+  dirtmpl build [name] [directory]
+
+    Generate a directory at [name] template.
+
+  dirtmpl list
+
+    List the templates in the registry.
+
+  dirtmpl rm [name]
+
+    Remove the directory template [name] from the registry.
+
