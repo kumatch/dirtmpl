@@ -3,24 +3,26 @@
 var dirtmpl = require('../');
 var argv = require('yargs').argv;
 var fs = require('fs');
+var path = require('path');
 var format = require('util').format;
 
 var command  = (argv._[0] || "help").toLowerCase();
 var name     = argv._[1]  || "default";
-var dirname  = argv._[2]  || ".";
+var dir      = argv._[2]  || ".";
 
-var template = dirtmpl();
+var configDir = argv.configDir ? path.resolve(argv.configDir) : undefined;
+var dirname = path.resolve(dir);
+
+var template = dirtmpl({ configDir: configDir });
 
 function renderUsage() {
     fs.createReadStream(__dirname + '/usage.txt').pipe(process.stdout);
 }
 
+
 if (command === 'help' || argv.h || argv.help) {
     return renderUsage();
 }
-
-
-
 
 switch (command) {
   case "add":
@@ -47,12 +49,26 @@ switch (command) {
 
   case "list":
   case "ls":
-    console.log("run list.");
+    template.list(function (err, templates) {
+        if (err) {
+            console.error(err);
+        } else {
+            if (templates && templates.length) {
+                console.log(templates.join('\n'));
+            }
+        }
+    });
     break;
 
   case "rm":
   case "remove":
-    console.log("run remove.");
+    template.remove(name, function (err) {
+        if (err) {
+            console.error(err);
+        } else {
+            console.log(format('Removed directory template "%s"', name));
+        }
+    });
     break;
 
   default:

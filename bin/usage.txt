@@ -12,7 +12,7 @@ Usage:
 
     List the templates in the registry.
 
-  dirtmpl rm [name]
+  dirtmpl remove [name]
 
     Remove the directory template [name] from the registry.
 
