@@ -58,9 +58,23 @@ module.exports = function (options) {
 
                 if (dst === configDir) {
                     callback(Error("invalid name: " + name));
-                } else {
-                    forceCopy(src, dst, callback);
+                    return;
                 }
+
+                fs.exists(dst, function (exists) {
+                    if (exists) {
+                        callback(Error("already exists: " + name));
+                        return;
+                    }
+
+                    mkdirp(dst, function (err) {
+                        if (err) {
+                            callback(err);
+                        } else {
+                            ncp(src, dst, callback);
+                        }
+                    });
+                });
             });
         },
 

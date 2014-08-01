@@ -185,6 +185,23 @@ describe('Dirtmpl errors', function () {
         });
     });
 
+    it('should raise error if same name templates is eixets in #add', function (done) {
+        var configDir = temp.mkdirSync("dirtmpl_");
+        var src = path.join(sampleDir, templateName);
+
+        mkdirp.sync(path.join(configDir, templateName));
+
+        dirtmpl({ configDir: configDir }).add(templateName, src, function (err) {
+            rimraf.sync(configDir);
+
+            if (err) {
+                done();
+            } else {
+                done(Error("not raise error"));
+            }
+        });
+    });
+
     it('should raise error if source dirname is not exists in #build', function (done) {
         dirtmpl({ configDir: dirname }).build("invalid", dirname, function (err) {
             if (err && err.message.match(/not exists/)) {
