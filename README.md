@@ -36,7 +36,7 @@ Store the directory templates at <directory> with the name <name>.
 
 ### dirtmpl build <name> <directory>
 
-Generate a directory at <name> template.
+Generate a directory at <name> template to <directory> path.
 
 ### dirtmpl list
 

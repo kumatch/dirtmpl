@@ -12,34 +12,10 @@ module.exports = function (options) {
     if (!options) options = {};
 
     var configDir = (options.configDir || path.join(home, '.config', 'dirtmpl')).replace(/[\/]$/, "");
+    var cleanBuild = options.clean ? true : false;
 
     function createPath (name) {
         return lockedpath(configDir).join(name);
-    }
-
-    function forceCopy(src, dst, callback) {
-        var afterCopy = function (err) {
-            if (err) {
-                callback(err);
-            } else {
-                ncp(src, dst, callback);
-            }
-        };
-
-        fs.exists(src, function (exists) {
-            if (!exists) {
-                callback(Error(src + ' is not exists.'));
-                return;
-            }
-
-            fs.exists(dst, function (exists) {
-                if (exists) {
-                    cleanupdir(dst, afterCopy);
-                } else {
-                    mkdirp(dst, afterCopy);
-                }
-            });
-        });
     }
 
     return {
@@ -78,6 +54,7 @@ module.exports = function (options) {
             });
         },
 
+
         build: function (name, dst, callback) {
             var src = createPath(name);
 
@@ -89,9 +66,29 @@ module.exports = function (options) {
             fs.exists(src, function (exists) {
                 if (!exists) {
                     callback(Error("not exists: " + name));
-                } else {
-                    forceCopy(src, dst, callback);
+                    return;
                 }
+
+
+                var afterCopy = function (err) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        ncp(src, dst, callback);
+                    }
+                };
+
+                fs.exists(dst, function (exists) {
+                    if (!exists) {
+                        mkdirp(dst, afterCopy);
+                    } else {
+                        if (cleanBuild) {
+                            cleanupdir(dst, afterCopy);
+                        } else {
+                            afterCopy();
+                        }
+                    }
+                });
             });
         },
 

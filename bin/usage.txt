@@ -6,7 +6,7 @@ Usage:
 
   dirtmpl build [name] [directory]
 
-    Generate a directory at [name] template.
+    Generate a directory at [name] template to [directory] path.
 
   dirtmpl list
 
@@ -21,3 +21,10 @@ Options:
   --configDir=[path]
 
     Set the template storage direcotry path.
+    (Default: $HOME/.config/dirtmpl)
+
+  --clean
+
+    Clean (remove all files / direcotry) target directory at build command.
+
+

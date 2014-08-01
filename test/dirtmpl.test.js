@@ -134,7 +134,7 @@ describe('Dirtmpl#build with configDir', function () {
     });
 
 
-    it('should generate a files / directories.', function(done) {
+    it('should generate a files / directories to a empty directory.', function(done) {
         template.build(templateName, output, function (err) {
             assert.ok(fs.existsSync(foofile));
             assertSameFileContent(foofile, path.join(sampleDir, templateName, foo));
@@ -148,6 +148,59 @@ describe('Dirtmpl#build with configDir', function () {
             done(err);
         });
     });
+
+    describe("to contained directory", function () {
+        var existsFile1 = path.join(output, "aaaaaa.txt");
+        var existsFile2 = path.join(output, "bbbbbb/cccccc.txt");
+        var content = "exists file text.";
+
+        beforeEach(function () {
+            mkdirp.sync(path.dirname(existsFile2));
+            fs.writeFileSync(existsFile1, content);
+            fs.writeFileSync(existsFile2, content);
+        });
+
+        it('should generate and merge a files / directories.', function(done) {
+            template.build(templateName, output, function (err) {
+                assert.ok(fs.existsSync(foofile));
+                assertSameFileContent(foofile, path.join(sampleDir, templateName, foo));
+
+                assert.ok(fs.existsSync(bazfile));
+                assertSameFileContent(bazfile, path.join(sampleDir, templateName, baz));
+
+                assert.ok(fs.existsSync(quxfile));
+                assertSameFileContent(quxfile, path.join(sampleDir, templateName, qux));
+
+                assert.ok(fs.existsSync(existsFile1));
+                assert.ok(fs.existsSync(existsFile2));
+                assert.equal(fs.readFileSync(existsFile1), content);
+                assert.equal(fs.readFileSync(existsFile2), content);
+
+                done(err);
+            });
+        });
+
+        it('should generate clean a files / directories if clean options.', function(done) {
+            var template = dirtmpl({ configDir: sampleDir, clean: true });
+
+            template.build(templateName, output, function (err) {
+                assert.ok(fs.existsSync(foofile));
+                assertSameFileContent(foofile, path.join(sampleDir, templateName, foo));
+
+                assert.ok(fs.existsSync(bazfile));
+                assertSameFileContent(bazfile, path.join(sampleDir, templateName, baz));
+
+                assert.ok(fs.existsSync(quxfile));
+                assertSameFileContent(quxfile, path.join(sampleDir, templateName, qux));
+
+                assert.ok(fs.existsSync(existsFile1) === false);
+                assert.ok(fs.existsSync(existsFile2) === false);
+
+                done(err);
+            });
+        });
+    });
+
 
     it('should raise error if source dirname is not exists.', function (done) {
         template.build("invalid", output, function (err) {

@@ -10,10 +10,13 @@ var command  = (argv._[0] || "help").toLowerCase();
 var name     = argv._[1]  || "default";
 var dir      = argv._[2]  || ".";
 
+var clean     = argv.clean ? true : false;
 var configDir = argv.configDir ? path.resolve(argv.configDir) : undefined;
 var dirname = path.resolve(dir);
 
-var template = dirtmpl({ configDir: configDir });
+var template = dirtmpl({ configDir: configDir, clean: clean });
+
+
 
 function renderUsage() {
     fs.createReadStream(__dirname + '/usage.txt').pipe(process.stdout);
