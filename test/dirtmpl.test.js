@@ -39,37 +39,78 @@ describe('Dirtmpl', function() {
 describe('Dirtmpl#add with configDir', function () {
     var name = "example" + Date.now();
 
-    var dirname = temp.mkdirSync("dirtmpl_");
-    var foofile = path.join(dirname, name, foo);
-    var bazfile = path.join(dirname, name, baz);
-    var quxfile = path.join(dirname, name, qux);
+    var configDir = temp.mkdirSync("dirtmpl_");
+    var foofile = path.join(configDir, name, foo);
+    var bazfile = path.join(configDir, name, baz);
+    var quxfile = path.join(configDir, name, qux);
 
-    var src = path.join(sampleDir, templateName);
+    var template;
 
-    before(function(done) {
-        dirtmpl({ configDir: dirname }).add(name, src, done);
+    beforeEach(function() {
+        template = dirtmpl({ configDir: configDir });
     });
 
-    after(function () {
-        if (fs.existsSync(dirname)) {
-            rimraf.sync(dirname);
+    afterEach(function () {
+        if (fs.existsSync(configDir)) {
+            rimraf.sync(configDir);
         }
     });
 
-    it('should copy a foo.txt to ' + foofile, function(){
-        assert.ok(fs.existsSync(foofile));
-        assertSameFileContent(foofile, path.join(src, foo));
+    it('should copy a files / directories.', function(done) {
+        var src = path.join(sampleDir, templateName);
+
+        template.add(name, src, function (err) {
+            assert.ok(fs.existsSync(foofile));
+            assertSameFileContent(foofile, path.join(src, foo));
+
+            assert.ok(fs.existsSync(bazfile));
+            assertSameFileContent(bazfile, path.join(src, baz));
+
+            assert.ok(fs.existsSync(quxfile));
+            assertSameFileContent(quxfile, path.join(src, qux));
+
+            done(err);
+        });
     });
 
-    it('should copy a bar/baz.txt to ' + bazfile, function(){
-        assert.ok(fs.existsSync(bazfile));
-        assertSameFileContent(bazfile, path.join(src, baz));
+    it('should raise error if source dirname is not exists.', function (done) {
+        var source = "/path/to/invalid_source_directory";
+
+        template.add("invalid", source, function (err) {
+            if (err && err.message.match(/not exists/)) {
+                done();
+            } else {
+                done(Error("not raise error"));
+            }
+        });
     });
 
-    it('should copy a bar/quux/qux.txt to ' + quxfile, function(){
-        assert.ok(fs.existsSync(quxfile));
-        assertSameFileContent(quxfile, path.join(src, qux));
+    it('should raise error if stores template path is configDir.', function (done) {
+        var src = path.join(sampleDir, templateName);
+
+        template.add("..", src, function (err) {
+            if (err && err.message.match(/invalid name/)) {
+                done();
+            } else {
+                done(Error("not raise error"));
+            }
+        });
     });
+
+    it('should raise error if same names template is already eixets.', function (done) {
+        mkdirp.sync(path.join(configDir, templateName));
+
+        var src = path.join(sampleDir, templateName);
+
+        template.add(templateName, src, function (err) {
+            if (err) {
+                done();
+            } else {
+                done(Error("not raise error"));
+            }
+        });
+    });
+
 });
 
 describe('Dirtmpl#build with configDir', function () {
@@ -80,151 +121,106 @@ describe('Dirtmpl#build with configDir', function () {
     var bazfile = path.join(output, baz);
     var quxfile = path.join(output, qux);
 
-    before(function(done) {
-        dirtmpl({ configDir: sampleDir }).build(templateName, output, done);
+    var template;
+
+    beforeEach(function() {
+        template = dirtmpl({ configDir: sampleDir });
     });
 
-    after(function () {
+    afterEach(function () {
         if (fs.existsSync(output)) {
             rimraf.sync(output);
         }
     });
 
-    it('should output a foo.txt to ' + foofile, function(){
-        assert.ok(fs.existsSync(foofile));
-        assertSameFileContent(foofile, path.join(sampleDir, templateName, foo));
+
+    it('should generate a files / directories.', function(done) {
+        template.build(templateName, output, function (err) {
+            assert.ok(fs.existsSync(foofile));
+            assertSameFileContent(foofile, path.join(sampleDir, templateName, foo));
+
+            assert.ok(fs.existsSync(bazfile));
+            assertSameFileContent(bazfile, path.join(sampleDir, templateName, baz));
+
+            assert.ok(fs.existsSync(quxfile));
+            assertSameFileContent(quxfile, path.join(sampleDir, templateName, qux));
+
+            done(err);
+        });
     });
 
-    it('should output a bar/baz.txt to ' + bazfile, function(){
-        assert.ok(fs.existsSync(bazfile));
-        assertSameFileContent(bazfile, path.join(sampleDir, templateName, baz));
+    it('should raise error if source dirname is not exists.', function (done) {
+        template.build("invalid", output, function (err) {
+            if (err && err.message.match(/not exists/)) {
+                done();
+            } else {
+                done(Error("not raise error"));
+            }
+        });
     });
 
-    it('should output a bar/quux/qux.txt to ' + quxfile, function(){
-        assert.ok(fs.existsSync(quxfile));
-        assertSameFileContent(quxfile, path.join(sampleDir, templateName, qux));
+    it('should raise error if source template path is configDir.', function (done) {
+        template.build("..", output, function (err) {
+            if (err && err.message.match(/invalid name/)) {
+                done();
+            } else {
+                done(Error("not raise error"));
+            }
+        });
     });
 });
 
 
 describe('Dirtmpl#list with configDir', function () {
-    var entries = [];
+    var template;
 
-    before(function(done) {
-        dirtmpl({ configDir: sampleDir }).list(function (err, results) {
-            entries = results;
+    beforeEach(function() {
+        template = dirtmpl({ configDir: sampleDir });
+    });
+
+    it('should get two templates', function(done) {
+        template.list(function (err, results) {
+            assert.equal(results.length, 2);
+            assert.equal(results[0], "abc");
+            assert.equal(results[1], "def");
+
             done(err);
         });
     });
-
-    it('should get two templates', function(){
-        assert.equal(entries.length, 2);
-    });
-
-    it('should get tempalte "abc"', function(){
-        assert.equal(entries[0], "abc");
-    });
-
-    it('should get tempalte "def"', function(){
-        assert.equal(entries[1], "def");
-    });
 });
+
 
 describe('Dirtmpl#remove with configDir', function () {
     var name = "example" + Date.now();
     var configDir = temp.mkdirSync("dirtmpl_");
-    var template_path = path.join(configDir, name);
 
-    before(function(done) {
-        mkdirp.sync(template_path);
+    var templateDirname = path.join(configDir, name);
 
-        if (!fs.existsSync(template_path)) {
-            done(Error("failed to create example directory."));
-            return;
-        }
+    var template;
 
-        dirtmpl({ configDir: configDir }).remove(name, done);
+    beforeEach(function() {
+        mkdirp.sync(templateDirname);
+        template = dirtmpl({ configDir: configDir });
     });
 
-    after(function () {
+    afterEach(function () {
         if (fs.existsSync(configDir)) {
             rimraf.sync(configDir);
         }
     });
 
-    it('should remove a template directory', function(){
-        assert.ok(fs.existsSync(template_path) === false);
-    });
-});
+    it('should remove a template directory.', function(done) {
+        assert.ok(fs.existsSync(templateDirname) === true);
 
-
-
-describe('Dirtmpl errors', function () {
-    var dirname = "/path/to/invalid_dirname" + Date.now();
-
-    it('should raise error if source dirname is not exists in #add', function (done) {
-
-        dirtmpl().add("invalid", dirname, function (err) {
-            if (err && err.message.match(/not exists/)) {
-                done();
-            } else {
-                done(Error("not raise error"));
-            }
+        template.remove(name, function (err) {
+            assert.ok(fs.existsSync(templateDirname) === false);
+            done(err);
         });
     });
 
-    it('should raise error if stores template path is configDir in #add', function (done) {
-        var src = path.join(sampleDir, templateName);
-
-        dirtmpl({ configDir: dirname }).add("..", src, function (err) {
+    it('should raise error if target template path is configDir.', function (done) {
+        template.remove("..", function (err) {
             if (err && err.message.match(/invalid name/)) {
-                done();
-            } else {
-                done(Error("not raise error"));
-            }
-        });
-    });
-
-    it('should raise error if same name templates is eixets in #add', function (done) {
-        var configDir = temp.mkdirSync("dirtmpl_");
-        var src = path.join(sampleDir, templateName);
-
-        mkdirp.sync(path.join(configDir, templateName));
-
-        dirtmpl({ configDir: configDir }).add(templateName, src, function (err) {
-            rimraf.sync(configDir);
-
-            if (err) {
-                done();
-            } else {
-                done(Error("not raise error"));
-            }
-        });
-    });
-
-    it('should raise error if source dirname is not exists in #build', function (done) {
-        dirtmpl({ configDir: dirname }).build("invalid", dirname, function (err) {
-            if (err && err.message.match(/not exists/)) {
-                done();
-            } else {
-                done(Error("not raise error"));
-            }
-        });
-    });
-
-    it('should raise error if source template path is configDir in #build', function (done) {
-        dirtmpl({ configDir: sampleDir }).build("..", dirname, function (err) {
-            if (err && err.message.match(/invalid name/)) {
-                done();
-            } else {
-                done(Error("not raise error"));
-            }
-        });
-    });
-
-    it('should raise error if target template path is configDir in #remove', function (done) {
-        dirtmpl({ configDir: dirname }).build("..", dirname, function (err) {
-            if (err) {
                 done();
             } else {
                 done(Error("not raise error"));
