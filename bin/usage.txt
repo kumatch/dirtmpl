@@ -16,3 +16,8 @@ Usage:
 
     Remove the directory template [name] from the registry.
 
+Options:
+
+  --configDir=[path]
+
+    Set the template storage direcotry path.

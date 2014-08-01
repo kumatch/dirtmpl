@@ -9,7 +9,7 @@ directory generator at the template.
 Install
 --------
 
-    $ npm install dirtmpl
+    $ npm install -g dirtmpl
 
 
 Example
@@ -27,28 +27,24 @@ Then build a target directory by template.
 $ dirtmpl build mydir /path/to/new_directory
 ```
 
-
-Methods
+CLI commands
 -------
 
-### var template = dirtmpl(options)
+# dirtmpl add <name> <directory>
 
-Create dirtmpl instance.
+Store the directory templates at <directory> with the name <name>.
 
-options:
+# dirtmpl build <name> <directory>
 
-* configDir: a stored configuration directory (default: $HOME/.config/dirtmpl)
+Generate a directory at <name> template.
 
+# dirtmpl list
 
-### template.add(name, dirname, callback)
+List the templates in the registry.
 
-Store the directory templates at `dirname` directory with the `name`.
+# dirtmpl remove <name>
 
-
-### template.build(name, dirname, callback)
-
-Generate a `dirname` directory at `name` template.
-
+Remove the directory template <name> from the registry.
 
 
 
