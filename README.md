@@ -30,19 +30,19 @@ $ dirtmpl build mydir /path/to/new_directory
 CLI commands
 -------
 
-# dirtmpl add <name> <directory>
+### dirtmpl add <name> <directory>
 
 Store the directory templates at <directory> with the name <name>.
 
-# dirtmpl build <name> <directory>
+### dirtmpl build <name> <directory>
 
 Generate a directory at <name> template.
 
-# dirtmpl list
+### dirtmpl list
 
 List the templates in the registry.
 
-# dirtmpl remove <name>
+### dirtmpl remove <name>
 
 Remove the directory template <name> from the registry.
 
